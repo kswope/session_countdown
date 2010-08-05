@@ -1,0 +1,149 @@
+
+= session_countdown
+
+
+A Ruby on Rails plugin that puts a countdown timer on the session
+object.
+
+  session.countdown_run(30.minutes)
+  session.countdown_running? # => true
+  session.countdown_expire
+  session.countdown_running? # => false
+  session.countdown_expired? # => true
+  session.countdown_restart
+  session.countdown_running? # => true
+
+=== But why?!?
+
+Sometimes I need to build my own custom rails authentication systems
+rather than use plugins such as Authlogic, Devise or
+restful_authentication.
+
+There is always a "timer" in my custom authentication contraptions,
+and there is always a session object lurking when I'm dealing with
+authentication stuff, so why not combine the two?
+
+== API
+
+
+<i>Note that except for countdown_run() and countdown_running?() all
+the public methods will throw a NoCountdown exception if called on a
+non-existent countdown timer.</i>
+
+
+Start a countdown timer
+
+   session.countdown_run(seconds, name = :default)
+
+<i>You can have multiple countdown timers if you name them.  The
+default countdown timer is named "default".</i>
+
+Check if a countdown timer exists and is currently running
+
+   session.countdown_running?(name = :default)
+
+Expire early
+
+   session.countdown_expire(name = :default)
+
+Restart, using the duration supplied to countdown_run
+
+   session.countdown_restart(name = :default)
+
+Check if expired
+
+   session.countdown_expired?(name = :default)
+
+<i>countdown_expired? is not the reverse of countdown_running?
+because only works on an existing countdown, otherwise it will throw a
+NoCountdown exception.  Its use will reveal only if an existing
+countdown is expired.  The statement !countdown_running?  can't tell
+you if the countdown has expired because it will return true if there
+was no countdown in the first place.</i>
+
+Remaining time in seconds
+
+   session.countdown_count(name = :default)
+
+
+= Synopsis
+
+=== In application_controller.rb
+
+  before_filter :authorize
+
+
+  def authorize
+    if session.countdown_running?
+      session.countdown_restart # give user more time
+    else
+      session[:original_uri] = request.request_uri
+      flash[:notice] = session.countdown_expired? ? "Login Expired" : "Please login"
+      redirect_to :login
+    end
+  end
+
+
+=== In any controller
+
+  def login
+    user = User.find_by_email(params[:email)
+    if user && user.password_matches?(params[:password])
+      session.countdown_run(1.hour)
+      redirect_to :controller => :private
+    else
+      flash.now[:notice] = "Sorry, email/password wrong"
+      render :index
+    end
+
+  end
+
+  def logout
+    session.countdown_expire
+    flash[:notice] = "You are now logged out"
+    redirect_to :index
+  end
+
+
+=== In user model
+
+  def before_save
+    if self.password_changed?
+      self.salt = SecureRandom.hex(10)
+      self.password = Digest::MD5.hexdigest(self.salt + self.password)
+    end
+  end
+
+  def password_matches?(password_to_match)
+    self.password == Digest::MD5.hexdigest(self.salt + password_to_match)
+  end
+
+
+=== Note: Remember me
+
+If you want an "remember me" feature you need to do two things.
+
+Set timer for far future when user checks "remember me"
+
+  session.countdown_run(1.year)
+
+Tell rails to serve up a persistent cookie instead of session cookie,
+probably in application_controller.rb
+
+  ActionController::Base.session_options[:expire_after] = 1.year
+
+=== Persistent vs session cookies
+
+There are two types of browser cookies: ones with expiration dates and
+ones without.  When a cookie doesnt have an expiration date it's a
+<i>session</i> cookie and will be deleted when the browser quits.  If
+the cookie has an expiration date it's a <i>persistent</i> cookie
+(a.k.a. domain cookie) and will be valid until that date.
+
+"Remember me" could work fine with only session cookies, provided the
+user never quits the browser, but users expect "remember me" to never
+expire their login <i>and</i> to persist across browser quits.  It
+also makes sense to set a far future expiration date or the cookie
+will eventually expire before the login does.
+
+
