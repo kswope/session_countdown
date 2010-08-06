@@ -5,7 +5,7 @@
 A Ruby on Rails plugin that puts a countdown timer on the session
 object.
 
-  session.countdown_run(30.minutes)
+  session.countdown_start(30.minutes)
   session.countdown_running? # => true
   session.countdown_expire
   session.countdown_running? # => false
@@ -32,7 +32,7 @@ non-existent countdown timer.</i>
 
 Start a countdown timer
 
-   session.countdown_run(seconds, name = :default)
+   session.countdown_start(seconds, name = :default)
 
 <i>You can have multiple countdown timers if you name them.  The
 default countdown timer is named "default".</i>
@@ -45,7 +45,7 @@ Expire early (i.e. logout)
 
    session.countdown_expire(name = :default)
 
-Restart, using the duration supplied to countdown_run
+Restart, using the duration supplied to countdown_start
 
    session.countdown_restart(name = :default)
 
@@ -91,7 +91,7 @@ Understanding timer running, expired, and never started
   def login
     user = User.find_by_email(params[:email)
     if user && user.password_matches?(params[:password])
-      session.countdown_run(1.hour)
+      session.countdown_start(1.hour)
       redirect_to :controller => :private
     else
       flash.now[:notice] = "Sorry, email/password wrong"
@@ -127,7 +127,7 @@ If you want an "remember me" feature you need to do two things.
 
 Set timer for far future when user checks "remember me"
 
-  session.countdown_run(1.year)
+  session.countdown_start(1.year)
 
 Tell rails to serve up a persistent cookie instead of session cookie,
 probably in application_controller.rb

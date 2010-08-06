@@ -8,7 +8,7 @@ module SessionCountdown
 
   @@default_name = "default"
 
-  def countdown_run(delta, name = @@default_name)
+  def countdown_start(delta, name = @@default_name)
     self[get_zero_key(name)] = Time.now + delta
     self[get_zero_delta_key(name)] = delta # save for reset
   end

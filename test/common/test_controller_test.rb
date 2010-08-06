@@ -17,7 +17,7 @@ class TestControllerTest < ActionController::TestCase
     assert ! session.countdown_running?
     assert ! session.countdown_expired?
 
-    session.countdown_run(1.minute)
+    session.countdown_start(1.minute)
     assert session.countdown_running?
     assert ! session.countdown_expired?
 
@@ -40,7 +40,7 @@ class TestControllerTest < ActionController::TestCase
     assert ! session.countdown_expired?
 
     # with countdown started
-    session.countdown_run(1.minute)
+    session.countdown_start(1.minute)
     assert session.countdown_running?
     assert ! session.countdown_expired?
 
@@ -56,8 +56,8 @@ class TestControllerTest < ActionController::TestCase
 
     ## start up two counters
 
-    session.countdown_run(1.minute)
-    session.countdown_run(1.minute, :admin)
+    session.countdown_start(1.minute)
+    session.countdown_start(1.minute, :admin)
 
     ## expire default counter
 
@@ -75,7 +75,7 @@ class TestControllerTest < ActionController::TestCase
 
     ## mixing calls to both timers
 
-    session.countdown_run(1.minute)
+    session.countdown_start(1.minute)
     assert session.countdown_running?()
     assert ! session.countdown_running?(:admin)
     session.countdown_expire
@@ -90,7 +90,7 @@ class TestControllerTest < ActionController::TestCase
 
   test "expiring and resetting" do
 
-    session.countdown_run(1.minute)
+    session.countdown_start(1.minute)
     assert session.countdown_running?
     assert ! session.countdown_expired?
 
@@ -108,7 +108,7 @@ class TestControllerTest < ActionController::TestCase
 
   test "named expiring and resetting" do
 
-    session.countdown_run(1.minute, :admin)
+    session.countdown_start(1.minute, :admin)
     assert session.countdown_running?(:admin)
     assert ! session.countdown_expired?(:admin)
 
@@ -144,7 +144,7 @@ class TestControllerTest < ActionController::TestCase
 
   test "countdown_count" do
 
-    session.countdown_run(1.minute)
+    session.countdown_start(1.minute)
     assert session.countdown_count < 1.minute
     assert session.countdown_count > (1.minute - 1)
     Timecop.travel(30.seconds)
@@ -163,7 +163,7 @@ class TestControllerTest < ActionController::TestCase
   # copied from README, mostly checking spelling
   test "rdoc example" do
 
-    session.countdown_run(30.minutes)
+    session.countdown_start(30.minutes)
     session.countdown_running? # => true
     session.countdown_expire
     session.countdown_running? # => false

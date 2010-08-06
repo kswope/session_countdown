@@ -1,7 +1,7 @@
 PATH
   remote: /Users/kevin/Development/session_countdown
   specs:
-    session_countdown (0.2.0)
+    session_countdown (0.3.0)
 
 GEM
   remote: http://rubygems.org/
