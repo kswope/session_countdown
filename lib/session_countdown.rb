@@ -39,8 +39,8 @@ module SessionCountdown
 
   ## these methods all require a sanity check for existing countdown
 
-  def _countdown_expire(name = @@default_name)
-    self[get_zero_key(name)] = Time.now
+  def _countdown_abort(name = @@default_name)
+    self[get_zero_key(name)] = nil
   end
 
   def _countdown_restart(name = @@default_name)
@@ -65,7 +65,9 @@ module SessionCountdown
   end
 
   def insist_countdown_exists(name = @@default_name)
-    unless self[get_zero_key(name)]
+    # We use delta_key here because timer might have been nil'd by
+    # aborting, but it still should be restartable.
+    unless self[get_zero_delta_key(name)]
       raise NoCountdown, "no session countdown named '#{name}'"
     end
   end

@@ -5,13 +5,18 @@
 A Ruby on Rails plugin that puts a countdown timer on the session
 object.
 
-  session.countdown_start(30.minutes)
+  session.countdown_start(1.hour)
+  session.countdown_count #=> 3600
   session.countdown_running? # => true
-  session.countdown_expire
+  # 60 minutes pass
+  session.countdown_count #=> 0
   session.countdown_running? # => false
   session.countdown_expired? # => true
   session.countdown_restart
   session.countdown_running? # => true
+  session.countdown_abort
+  session.countdown_running? # => false
+  session.countdown_expired? # => false
 
 === But why?!?
 
@@ -26,7 +31,7 @@ authentication stuff, so why not combine the two?
 == API
 
 
-<i>Note that countdown_expire(), countdown_restart() and
+<i>Note that countdown_abort(), countdown_restart() and
 countdown_count() will throw a NoCountdown exception if called on a
 non-existent countdown timer.</i>
 
@@ -43,7 +48,7 @@ Check if a countdown timer exists and is currently running
 
 Expire early (i.e. logout)
 
-   session.countdown_expire(name = :default)
+   session.countdown_abort(name = :default)
 
 Restart, using the duration supplied to countdown_start
 
@@ -101,7 +106,7 @@ Understanding timer running, expired, and never started
   end
 
   def logout
-    session.countdown_expire
+    session.countdown_abort
     flash[:notice] = "You are now logged out"
     redirect_to :index
   end

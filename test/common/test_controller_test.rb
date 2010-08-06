@@ -21,10 +21,10 @@ class TestControllerTest < ActionController::TestCase
     assert session.countdown_running?
     assert ! session.countdown_expired?
 
-    session.countdown_expire
+    session.countdown_abort
 
     assert ! session.countdown_running?
-    assert session.countdown_expired?
+    assert ! session.countdown_expired?
 
     session.countdown_restart
     assert ! session.countdown_expired?
@@ -45,9 +45,9 @@ class TestControllerTest < ActionController::TestCase
     assert ! session.countdown_expired?
 
     # with countdown expired
-    session.countdown_expire
+    session.countdown_abort
     assert ! session.countdown_running?
-    assert session.countdown_expired?
+    assert ! session.countdown_expired?
 
   end
 
@@ -59,27 +59,27 @@ class TestControllerTest < ActionController::TestCase
     session.countdown_start(1.minute)
     session.countdown_start(1.minute, :admin)
 
-    ## expire default counter
+    ## abort default counter
 
     assert session.countdown_running?
-    session.countdown_expire
+    session.countdown_abort
     assert ! session.countdown_running?
-    assert session.countdown_expired?
+    assert ! session.countdown_expired?
 
-    ## expire admin counter
+    ## abort admin counter
 
     assert session.countdown_running?(:admin)
-    session.countdown_expire(:admin)
+    session.countdown_abort(:admin)
     assert ! session.countdown_running?(:admin)
-    assert session.countdown_expired?(:admin)
+    assert ! session.countdown_expired?(:admin)
 
     ## mixing calls to both timers
 
     session.countdown_start(1.minute)
     assert session.countdown_running?()
     assert ! session.countdown_running?(:admin)
-    session.countdown_expire
-    assert session.countdown_expired?(:admin)
+    session.countdown_abort
+    assert ! session.countdown_expired?(:admin)
     session.countdown_restart(:admin)
     assert session.countdown_running?(:admin)
     assert ! session.countdown_expired?(:admin)
@@ -129,13 +129,13 @@ class TestControllerTest < ActionController::TestCase
     # restart, expire and count require an existing countdown, should
     # throw exception if there isn't one
 
-    assert_raise(NoCountdown) { session.countdown_expire }
+    assert_raise(NoCountdown) { session.countdown_abort }
     assert_raise(NoCountdown) { session.countdown_restart }
     assert_raise(NoCountdown) { session.countdown_count }
 
     ## try with named countdown
 
-    assert_raise(NoCountdown) { session.countdown_expire(:admin) }
+    assert_raise(NoCountdown) { session.countdown_abort(:admin) }
     assert_raise(NoCountdown) { session.countdown_restart(:admin) }
     assert_raise(NoCountdown) { session.countdown_count(:admin) }
 
@@ -163,13 +163,18 @@ class TestControllerTest < ActionController::TestCase
   # copied from README, mostly checking spelling
   test "rdoc example" do
 
-    session.countdown_start(30.minutes)
-    session.countdown_running? # => true
-    session.countdown_expire
-    session.countdown_running? # => false
-    session.countdown_expired? # => true
+    session.countdown_start(1.hour)
+    assert (3599 < session.countdown_count)
+    assert session.countdown_running?
+    Timecop.travel(60.minute)
+    assert_equal 0, session.countdown_count
+    assert ! session.countdown_running?
+    assert session.countdown_expired?
     session.countdown_restart
-    session.countdown_running? # => true
+    assert session.countdown_running?
+    session.countdown_abort
+    assert ! session.countdown_running?
+    assert ! session.countdown_expired?
 
   end
 
