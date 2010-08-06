@@ -21,11 +21,20 @@ module SessionCountdown
     self[get_zero_key(name)] && ! countdown_running?(name)
   end
 
-  # sanity check for existing countdown for some methods
+  # sanity checkpoint for some methods, checking for existing countdown
   def method_missing(method, *args)
-    insist_countdown_exists(*args) # reason for this method_missing()
-    method = "_#{method}"
-    respond_to?(method) ? send(method, *args) : raise(NoMethodError)
+
+    method = "_#{method}" # super secret shadow method
+
+    # first check if method exists
+    raise NoMethodError unless respond_to?(method)
+
+    # check if specified countdown timer exists - reason for this method_missing
+    insist_countdown_exists(*args)
+
+    # finally run method
+    send(method, *args)
+
   end
 
   ## these methods all require a sanity check for existing countdown

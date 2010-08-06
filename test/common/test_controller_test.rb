@@ -4,6 +4,14 @@ require 'timecop'
 class TestControllerTest < ActionController::TestCase
 
 
+  test "fantasy/typo methods" do
+
+    assert_raise(NoMethodError) { session.countdown_banana }
+    assert_raise(NoMethodError) { session.countdown_banana(123) }
+
+  end
+
+
   test "single default" do
 
     assert ! session.countdown_running?
@@ -24,6 +32,7 @@ class TestControllerTest < ActionController::TestCase
 
   end
 
+
   test "truth table test" do
 
     # with no countdown started these conditions should be met
@@ -41,7 +50,6 @@ class TestControllerTest < ActionController::TestCase
     assert session.countdown_expired?
 
   end
-
 
 
   test "mixed names" do
