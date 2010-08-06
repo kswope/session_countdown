@@ -26,10 +26,9 @@ authentication stuff, so why not combine the two?
 == API
 
 
-<i>Note that except for countdown_run() and countdown_running?() all
-the public methods will throw a NoCountdown exception if called on a
+<i>Note that countdown_expire(), countdown_restart() and
+countdown_count() will throw a NoCountdown exception if called on a
 non-existent countdown timer.</i>
-
 
 Start a countdown timer
 
@@ -42,7 +41,7 @@ Check if a countdown timer exists and is currently running
 
    session.countdown_running?(name = :default)
 
-Expire early
+Expire early (i.e. logout)
 
    session.countdown_expire(name = :default)
 
@@ -54,16 +53,15 @@ Check if expired
 
    session.countdown_expired?(name = :default)
 
-<i>countdown_expired? is not the reverse of countdown_running?
-because only works on an existing countdown, otherwise it will throw a
-NoCountdown exception.  Its use will reveal only if an existing
-countdown is expired.  The statement !countdown_running?  can't tell
-you if the countdown has expired because it will return true if there
-was no countdown in the first place.</i>
-
 Remaining time in seconds
 
    session.countdown_count(name = :default)
+
+Understanding timer running, expired, and never started
+
+  countdown_running? == true # timer running
+  countdown_expired? == true # timer expired
+  countdown_running? == false && countdown_expired? == false # never ran
 
 
 = Synopsis
@@ -72,13 +70,17 @@ Remaining time in seconds
 
   before_filter :authorize
 
-
   def authorize
     if session.countdown_running?
-      session.countdown_restart # give user more time
+      session.countdown_restart # extend user's login
     else
-      session[:original_uri] = request.request_uri
-      flash[:notice] = session.countdown_expired? ? "Login Expired" : "Please login"
+      # store attempted access before rudely redirected to login screen
+      session[:original_uri] = request.request_uri # rails3 use request.fullpath
+      if session.countdown_expired?
+        flash[:notice] = "Login Expired"
+      else
+        flash[:notice] = "Please login"
+      end
       redirect_to :login
     end
   end

@@ -7,6 +7,7 @@ class TestControllerTest < ActionController::TestCase
   test "single default" do
 
     assert ! session.countdown_running?
+    assert ! session.countdown_expired?
 
     session.countdown_run(1.minute)
     assert session.countdown_running?
@@ -22,6 +23,25 @@ class TestControllerTest < ActionController::TestCase
     assert session.countdown_running?
 
   end
+
+  test "truth table test" do
+
+    # with no countdown started these conditions should be met
+    assert ! session.countdown_running?
+    assert ! session.countdown_expired?
+
+    # with countdown started
+    session.countdown_run(1.minute)
+    assert session.countdown_running?
+    assert ! session.countdown_expired?
+
+    # with countdown expired
+    session.countdown_expire
+    assert ! session.countdown_running?
+    assert session.countdown_expired?
+
+  end
+
 
 
   test "mixed names" do
@@ -98,19 +118,17 @@ class TestControllerTest < ActionController::TestCase
 
   test "unstable state" do
 
-    ## all public methods except countdown_run and countdown_running?
-    ## require an existing countdown
+    # restart, expire and count require an existing countdown, should
+    # throw exception if there isn't one
 
     assert_raise(NoCountdown) { session.countdown_expire }
     assert_raise(NoCountdown) { session.countdown_restart }
-    assert_raise(NoCountdown) { session.countdown_expired? }
     assert_raise(NoCountdown) { session.countdown_count }
 
     ## try with named countdown
 
     assert_raise(NoCountdown) { session.countdown_expire(:admin) }
     assert_raise(NoCountdown) { session.countdown_restart(:admin) }
-    assert_raise(NoCountdown) { session.countdown_expired?(:admin) }
     assert_raise(NoCountdown) { session.countdown_count(:admin) }
 
   end

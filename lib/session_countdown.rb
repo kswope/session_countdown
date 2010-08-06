@@ -17,9 +17,13 @@ module SessionCountdown
     self[get_zero_key(name)] && self[get_zero_key(name)] > Time.now
   end
 
+  def countdown_expired?(name = @@default_name)
+    self[get_zero_key(name)] && ! countdown_running?(name)
+  end
+
   # sanity check for existing countdown for some methods
   def method_missing(method, *args)
-    check_countdown_exists(*args) # reason for this method_missing()
+    insist_countdown_exists(*args) # reason for this method_missing()
     method = "_#{method}"
     respond_to?(method) ? send(method, *args) : raise(NoMethodError)
   end
@@ -28,10 +32,6 @@ module SessionCountdown
 
   def _countdown_expire(name = @@default_name)
     self[get_zero_key(name)] = Time.now
-  end
-
-  def _countdown_expired?(name = @@default_name)
-    ! countdown_running?(name)
   end
 
   def _countdown_restart(name = @@default_name)
@@ -55,7 +55,7 @@ module SessionCountdown
     "session_countdown:#{name}_delta"
   end
 
-  def check_countdown_exists(name = @@default_name)
+  def insist_countdown_exists(name = @@default_name)
     unless self[get_zero_key(name)]
       raise NoCountdown, "no session countdown named '#{name}'"
     end
