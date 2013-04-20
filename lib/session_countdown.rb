@@ -75,17 +75,7 @@ module SessionCountdown
 end
 
 
-if Rails::VERSION::MAJOR == 2
-
-  class ActionController::Session::AbstractStore::SessionHash
-    include SessionCountdown
-  end
-
-else
-
-  class ActionDispatch::Session::AbstractStore::SessionHash
-    include SessionCountdown
-  end
-
+class ActionDispatch::Session::AbstractStore::SessionHash
+  include SessionCountdown
 end
 
