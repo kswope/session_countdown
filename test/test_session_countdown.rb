@@ -24,6 +24,16 @@ end
 class TestSessionCountdown < Test::Unit::TestCase
 
 
+
+  def setup
+
+    # need to zero out the bogus session between tests
+    $session = nil
+
+  end
+
+
+
   def test_big_sequence_of_stuff
 
     Timecop.freeze(Time.now)
@@ -120,7 +130,37 @@ class TestSessionCountdown < Test::Unit::TestCase
 
 
   def test_timer_name_typos
-    # dont forget calling default when only named exists
+
+    # Timecop.freeze(Time.now)
+
+    # start a few named session countdown 
+    session.countdown_start(1.hour, :a)
+    session.countdown_start(1.hour, :b)
+
+    ### use the unnamed default by mistake
+
+    assert_raise(NoCountdown) do
+      session.countdown_running?
+    end
+
+    assert_raise(NoCountdown) do
+      session.countdown_expired?
+    end
+
+    assert_raise(NoCountdown) do
+      session.countdown_abort
+    end
+
+    assert_raise(NoCountdown) do
+      session.countdown_restart
+    end
+
+    assert_raise(NoCountdown) do
+      session.countdown_count
+    end
+
+
+
   end
 
 

@@ -9,11 +9,13 @@ class NoCountdown < Exception; end
 module SessionCountdown
 
 
+
   @@default_name = "default"
 
 
   #-----------------------------------------------------------------------------
-  #
+  # Required to start a countdown.  The delta is how long the countdown is, in
+  # seconds, and the name allows multiple countdowns to be created.
   #-----------------------------------------------------------------------------
   def countdown_start(delta, name = @@default_name)
 
@@ -50,7 +52,6 @@ module SessionCountdown
     zero_time(name) && ! countdown_running?(name)
 
   end
-
 
 
 
@@ -159,9 +160,8 @@ module SessionCountdown
   #-----------------------------------------------------------------------------
   def insist_countdown_exists(name)
     
-    # We use delta_key here because timer might have been nil'd by aborting,
-    # but there's will still be a delta
-    # unless self[delta_key(name)]
+    # We use delta here because the timer might have been nil'd by aborting,
+    # but there's will still be a delta.
     unless delta(name)
       raise NoCountdown, "no session countdown named '#{name}'"
     end

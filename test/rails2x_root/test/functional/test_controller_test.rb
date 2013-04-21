@@ -1,1 +1,0 @@
-../../../common/test_controller_test.rb
