@@ -16,7 +16,7 @@ end
 # Now we need a global 'session object' for the tests to look natural.
 def session
   $session = $session || FakeSession.new
-  return $session # you see what I'm doing?
+  return $session # global masquerading as something else)
 end
 
 
@@ -24,17 +24,18 @@ end
 class TestSessionCountdown < Test::Unit::TestCase
 
 
-  def test_lots_o_stuff
+  def test_big_sequence_of_stuff
 
     Timecop.freeze(Time.now)
 
     # start an unnamed session countdown 
     session.countdown_start(1.hour)
 
+    # the time left should be 1 hour
     assert_equal(1.hour, session.countdown_count)
 
+    # and the timer should be running
     assert(session.countdown_running?)
-
     
     # one hour passes
     Timecop.freeze(Time.now + 1.hour)
@@ -66,6 +67,60 @@ class TestSessionCountdown < Test::Unit::TestCase
     # but that doesn't mean its expired (no idea how to use this)
     refute session.countdown_expired?
 
+  end
+
+
+
+  def test_multiple_timers
+
+    Timecop.freeze(Time.now)
+
+    # start two named session countdowns
+    session.countdown_start(1.hour, :a)
+    session.countdown_start(1.hour, :b)
+
+    # the times left should be 1 hour
+    assert_equal(1.hour, session.countdown_count(:a))
+    assert_equal(1.hour, session.countdown_count(:b))
+
+    # and the timers should be running
+    assert(session.countdown_running?(:a))
+    assert(session.countdown_running?(:b))
+    
+    # one hour passes
+    Timecop.freeze(Time.now + 1.hour)
+
+    # countdown should be finished
+    assert_equal(0, session.countdown_count(:a))
+    assert_equal(0, session.countdown_count(:b))
+
+    # restarting one timer only
+    session.countdown_restart(:a)
+
+    # and only one timer should be running
+    assert(session.countdown_running?(:a))
+    refute(session.countdown_running?(:b))
+
+    # jump ahead 30 minutes
+    Timecop.freeze(Time.now + 30.minutes)
+
+    # timer :a should be down to half an hour
+    assert_equal(30.minutes, session.countdown_count(:a))
+
+    # timer :b should still be done
+    assert_equal(0.minutes, session.countdown_count(:b))
+
+    # restart :b, and now :a should be half that of :b
+    session.countdown_restart(:b)
+    assert_equal(30.minutes, session.countdown_count(:a))
+    assert_equal(60.minutes, session.countdown_count(:b))
+
+  end
+
+
+
+  def test_timer_name_typos
+    # dont forget calling default when only named exists
   end
 
 
