@@ -9,7 +9,7 @@ gem 'sqlite3'
 
 
 
-
+gem 'timecop'
 gem 'session_countdown', :path => '../..'
 
 

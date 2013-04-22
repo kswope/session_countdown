@@ -174,8 +174,17 @@ end # module SessionCountdown
 
 
 
-# stuff all the cool methods above into rail's session object
+### stuff all the cool methods above into rail's session object
+
+
+# This is necessary for Rack::Session::Abstract::SessionHash to be found,
+# (error: "uninitialized constant Rack::Session::Abstract")
+# this changed in rails3 and seems a little sketchy
 class ActionDispatch::Session::AbstractStore::SessionHash
-  include SessionCountdown
 end
 
+# I guess this is the true identity of the session hash now.
+class Rack::Session::Abstract::SessionHash
+  include SessionCountdown
+end
+   
