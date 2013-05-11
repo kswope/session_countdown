@@ -34,8 +34,6 @@ module SessionCountdown
   #-----------------------------------------------------------------------------
   def countdown_running?(name = @@default_name)
 
-    insist_countdown_exists(name)
-
     zero_time(name) && ( zero_time(name) > Time.now )
 
   end
@@ -46,8 +44,6 @@ module SessionCountdown
   #
   #-----------------------------------------------------------------------------
   def countdown_expired?(name = @@default_name)
-
-    insist_countdown_exists(name)
 
     zero_time(name) && ! countdown_running?(name)
 
@@ -60,8 +56,6 @@ module SessionCountdown
   #-----------------------------------------------------------------------------
   def countdown_abort(name = @@default_name)
 
-    insist_countdown_exists(name)
-
     set_zero_time(nil, name)
 
   end
@@ -72,8 +66,6 @@ module SessionCountdown
   #
   #-----------------------------------------------------------------------------
   def countdown_restart(name = @@default_name)
-
-    insist_countdown_exists(name)
 
     new_zero_time = Time.now + delta(name)
     set_zero_time(new_zero_time, name)
@@ -86,8 +78,6 @@ module SessionCountdown
   #
   #-----------------------------------------------------------------------------
   def countdown_count(name = @@default_name)
-
-    insist_countdown_exists(name)
 
     remaining = zero_time(name) - Time.now
     (remaining > 0) ? remaining : 0
@@ -150,22 +140,6 @@ module SessionCountdown
   #-----------------------------------------------------------------------------
   def delta(name)
     self[delta_key(name)] 
-  end
-
-
-
-  #-----------------------------------------------------------------------------
-  # A sanity check for timer name typos or other screwups.
-  # Wishing ruby had decorators (faking it with method_missing too ugly)
-  #-----------------------------------------------------------------------------
-  def insist_countdown_exists(name)
-    
-    # We use delta here because the timer might have been nil'd by aborting,
-    # but there's will still be a delta.
-    unless delta(name)
-      raise NoCountdown, "no session countdown named '#{name}'"
-    end
-
   end
 
 
