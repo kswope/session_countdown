@@ -34,7 +34,7 @@ module SessionCountdown
   #-----------------------------------------------------------------------------
   def countdown_running?(name = @@default_name)
 
-    zero_time(name) && ( zero_time(name) > Time.now )
+    ( zero_time(name) && ( zero_time(name) > Time.now ) ) ? true : false
 
   end
 
@@ -45,7 +45,7 @@ module SessionCountdown
   #-----------------------------------------------------------------------------
   def countdown_expired?(name = @@default_name)
 
-    zero_time(name) && ! countdown_running?(name)
+    ( zero_time(name) && ! countdown_running?(name) ) ? true : false
 
   end
 
