@@ -1,4 +1,3 @@
-require 'rubygems'
 require 'action_controller'
 
 
@@ -22,9 +21,9 @@ module SessionCountdown
     zero_time = Time.now + delta # when timer is done
 
     set_zero_time(zero_time, name) # save in session
-    
+
     set_delta(delta, name) # needed for restarts, etc
-    
+
   end
 
 
@@ -112,7 +111,7 @@ module SessionCountdown
   # session hash accessor
   #-----------------------------------------------------------------------------
   def set_zero_time(time, name)
-    self[zero_key(name)] = time 
+    self[zero_key(name)] = time
   end
 
 
@@ -121,7 +120,7 @@ module SessionCountdown
   # session hash accessor
   #-----------------------------------------------------------------------------
   def zero_time(name)
-    self[zero_key(name)] 
+    self[zero_key(name)]
   end
 
 
@@ -139,7 +138,7 @@ module SessionCountdown
   # session hash accessor
   #-----------------------------------------------------------------------------
   def delta(name)
-    self[delta_key(name)] 
+    self[delta_key(name)]
   end
 
 
@@ -148,17 +147,17 @@ end # module SessionCountdown
 
 
 
-### stuff all the cool methods above into rail's session object
+# Stuff all the cool methods above into rail's session object.
+# Session class between production and test doesn't seem to have a common parent.
 
 
-# This is necessary for Rack::Session::Abstract::SessionHash to be found,
-# (error: "uninitialized constant Rack::Session::Abstract")
-# this changed in rails3 and seems a little sketchy
-class ActionDispatch::Session::AbstractStore::SessionHash
-end
-
-# I guess this is the true identity of the session hash now.
+# this is for test session (but why does it look so 'untesty'?)
 class Rack::Session::Abstract::SessionHash
   include SessionCountdown
 end
-   
+
+# I guess this is the true identity of the session hash now.
+class ActionDispatch::Request::Session
+  include SessionCountdown
+end
+
