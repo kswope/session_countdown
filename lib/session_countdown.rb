@@ -143,21 +143,17 @@ module SessionCountdown
 
 
 
+
+
+
+
+
 end # module SessionCountdown
 
 
 
-# Stuff all the cool methods above into rail's session object.
-# Session class between production and test doesn't seem to have a common parent.
-
-
-# this is for test session (but why does it look so 'untesty'?)
-class Rack::Session::Abstract::SessionHash
-  include SessionCountdown
-end
-
-# I guess this is the true identity of the session hash now.
-class ActionDispatch::Request::Session
-  include SessionCountdown
+ActiveSupport.on_load :action_controller do
+  Rack::Session::Abstract::SessionHash.send :include, SessionCountdown # testing
+  ActionDispatch::Request::Session.send :include, SessionCountdown
 end
 
